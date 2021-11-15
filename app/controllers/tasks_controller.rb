@@ -4,7 +4,7 @@ class TasksController < ApplicationController
   before_action:redirect_to_signin
 
   def index
-    @tasks = Task.all
+    @tasks = Task.where(user_id: session[:user_id])
     @tasks = @tasks.where(name: params[:name]) if params[:name].present?
     @tasks = @tasks.where(content: params[:content]) if params[:content].present?
   end
@@ -17,6 +17,8 @@ class TasksController < ApplicationController
   end
 
   def create
+    task_params = params.require(:task).permit(:name, :content)
+    task_params[:user_id] = session[:user_id]
     @task = Task.new(task_params)
     if @task.save
       flash[:notice] = "タスク#{task_params[:name]}を登録しました"
@@ -48,7 +50,7 @@ class TasksController < ApplicationController
 
   private
   def set_task
-    @task = Task.find(params[:id])
+    @task = Task.where(user_id: session[:user_id]).find(params[:id])
   end
   
   private
